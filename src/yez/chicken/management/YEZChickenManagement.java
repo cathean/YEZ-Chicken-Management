@@ -1,21 +1,49 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package yez.chicken.management;
+import java.util.Scanner;
 
-/**
- *
- * @author ivans
- */
-public class YEZChickenManagement {
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
-    }
-    
+public class YEZChickenManagement
+{
+    public static void main(String[] args)
+    {
+        MenuOption menu = new MenuOption();
+        DBManager db = new DBManager();
+        Scanner scn = new Scanner(System.in);
+        int opt = 0;
+        
+        db.ConnectDB();
+        
+        do
+        {
+            menu.mainMenu();
+            opt = scn.nextInt();
+            
+            switch(opt)
+            {
+                case 1:
+                    menu.orderMenu();
+                    opt = scn.nextInt();
+                    
+                    switch(opt)
+                    {
+                        case 0:
+                            opt = -1;
+                            break;
+                    }
+                    break;
+                case 2:
+                    menu.productMenu();
+                    opt = scn.nextInt();
+                    
+                    switch(opt)
+                    {
+                        case 0:
+                            opt = -1;
+                            break;
+                    }
+                    break;
+            }
+            
+        }while(opt != 0);
+        
+    }   
 }
