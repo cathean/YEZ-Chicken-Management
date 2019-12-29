@@ -1,4 +1,5 @@
 package yez.chicken.management;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class YEZChickenManagement
@@ -31,6 +32,7 @@ public class YEZChickenManagement
                     }
                     break;
                 case 2:
+                    menu.clearScreen();
                     menu.productMenu();
                     opt = scn.nextInt();
                     

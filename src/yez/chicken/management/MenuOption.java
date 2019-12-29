@@ -1,5 +1,7 @@
 package yez.chicken.management;
 
+import java.io.IOException;
+
 public class MenuOption
 {
     public void mainMenu()
@@ -64,5 +66,10 @@ public class MenuOption
     public void delProductMenu()
     {
         
+    }
+    
+    public static void clearScreen()
+    {
+        for (int i = 0; i < 50; ++i) System.out.println();
     }
 }
