@@ -4,8 +4,18 @@ import java.io.File;
 
 public class DBManager
 {
+    enum fetchTable
+    {
+        PELANGGAN,
+        PELAYAN,
+        PRODUK,
+        ORDERS,
+        DETAIL_ORDER
+    }
+    
     public Connection conn = null;
     public Statement stmt = null;
+    public ResultSet rs = null;
     
     private boolean isDBExist = false;
     private String dbName = "YEZ.db";
@@ -18,7 +28,6 @@ public class DBManager
             conn = DriverManager.getConnection("jdbc:sqlite:YEZ.db");
 
             initTables();
-            addCustomer("ivan", "1234", "tubais");
         }catch(Exception e)
         {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -56,25 +65,24 @@ public class DBManager
         
         sql = "CREATE TABLE IF NOT EXISTS ORDERS " +
               "(ID_ORDERS     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-              " TGL_PEMBELIAN DATE                              NOT NULL," +
-              " TOTAL         INTEGER                           NOT NULL," +
+              " TGL_PEMBELIAN DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL," +
               " ID_PELANGGAN  INTEGER                           NOT NULL," +
               " ID_PELAYAN  INTEGER                           NOT NULL," +
               " FOREIGN KEY(ID_PELANGGAN)   REFERENCES PELANGGAN(ID_PELANGGAN)," +
               " FOREIGN KEY(ID_PELAYAN)     REFERENCES PELAYAN(ID_PELAYAN))";
         stmt.executeUpdate(sql);
         
-        sql = "CREATE TABLE IF NOT EXISTS DETAIL_ORDER " +
+        sql = "CREATE TABLE IF NOT EXISTS DETAIL_ORDERS " +
               "(ID_DETAIL_ORDERS     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
               " KUANTITAS_PRODUK     INTEGER                           NOT NULL," +
-              " HARGA                INTEGER                           NOT NULL," +
+              " TOTAL                INTEGER                           NOT NULL," +
               " ID_ORDERS            INTEGER                           NOT NULL," +
               " ID_PRODUK            INTEGER                           NOT NULL," +
               " FOREIGN KEY(ID_ORDERS)   REFERENCES ORDERS(ID_ORDERS)," +
               " FOREIGN KEY(ID_PRODUK)   REFERENCES PRODUK(ID_PRODUK))";
         stmt.executeUpdate(sql);
         
-        // PRODUK COLUMNS ----
+        // ADD PRODUK COLUMNS ----
         
         sql = "INSERT OR REPLACE INTO PRODUK" +
               "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
@@ -110,9 +118,16 @@ public class DBManager
               "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
               "VALUES (7, 'Nutrisasri', 'Minuman', 12, 3000)";
         stmt.executeUpdate(sql);
+        
+        // ADD PELANGGAN COLUMNS ---
+        
+        sql = "INSERT OR REPLACE INTO PELAYAN " +
+              "(NAMA, NO_TELP, ALAMAT) " +
+              "VALUES ('Thoriq', '08123456789', 'Tubagus Ismail Dalam' )";
+        stmt.executeUpdate(sql);
     }
     
-    private void addCustomer(String nama, String telp, String alamat) throws SQLException
+    public void addPelanggan(String nama, String telp, String alamat) throws SQLException
     {
         stmt = conn.createStatement();
         
@@ -122,12 +137,50 @@ public class DBManager
         stmt.executeUpdate(sql);
     }
     
-    private void addOrders() throws SQLException
+    private void addPelayan(String nama, String telp, String alamat) throws SQLException
+    {
+        stmt = conn.createStatement();
+        
+        String sql = "INSERT INTO PELAYAN " +
+                     "(NAMA, NO_TELP, ALAMAT) " +
+                     "VALUES ('" + nama + "', '" + telp + "', '" + alamat + "')";
+        stmt.executeUpdate(sql);
+    }
+    
+    private void addOrders(int id_pelanggan, int id_pelayan) throws SQLException
     {
         stmt = conn.createStatement();
         
         String sql = "INSERT INTO ORDERS " +
-                     " (TGL_PEMBELIAN, TOTAL, ID_PELANGGAN, ID_PELAYAN) " +
-                     " VALUES ()";
+                     " (ID_PELANGGAN, ID_PELAYAN) " +
+                     " VALUES ('" + id_pelanggan + "', '" + id_pelayan + "')";
+        stmt.executeUpdate(sql);
+    }
+    
+    private void addOrdersDetail(int Qty, int total, int id_orders, int id_produk) throws SQLException
+    {
+        stmt = conn.createStatement();
+        
+        String sql = "INSERT INTO DETAIL_ORDERS " +
+                    " (KUANTITAS_PROUDK, TOTAL, ID_ORDERS, ID_PRODUK) " +
+                    " VALUES ('" + Qty + "', '" + total + "', '" + id_orders + "', '" + id_produk + "')";
+        stmt.executeUpdate(sql);
+    }
+    
+    public ResultSet fetchTable(fetchTable ft) throws SQLException
+    {
+        stmt = conn.createStatement();
+        String sql = "";
+        
+        if(ft == fetchTable.PELANGGAN)
+            sql = "SELECT * FROM PELANGGAN";
+        else if(ft == fetchTable.PELAYAN)
+            sql = "SELECT * FROM PELAYAN";
+        else if(ft == fetchTable.PRODUK)
+            sql = "SELECT * FROM PRODUK";
+        
+        rs = stmt.executeQuery(sql);
+        
+        return rs;
     }
 }

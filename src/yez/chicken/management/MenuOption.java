@@ -1,9 +1,23 @@
 package yez.chicken.management;
 
 import java.io.IOException;
+import java.util.Scanner;
+import java.sql.*;
 
 public class MenuOption
 {
+    private Scanner scn = null;
+    private DBManager db = null;
+    private ResultSet rs = null;
+    
+    MenuOption()
+    {
+        scn = new Scanner(System.in);
+        db = new DBManager();
+        
+        db.ConnectDB();
+    }
+    
     public void mainMenu()
     {
         System.out.printf(
@@ -32,9 +46,35 @@ public class MenuOption
         
     }
     
-    public void addOrderMenu()
+    public void addOrderMenu() throws SQLException
     {
+        System.out.println("MASUKKAN DATA PELANGGAN");
+        System.out.println("=======================");
+        System.out.print("Nama     : ");
+        String nama = scn.nextLine();
         
+        System.out.print("No. Telp : ");
+        String telp = scn.nextLine();
+        
+        System.out.print("Alamat   : ");
+        String alamat = scn.nextLine();
+        
+        db.addPelanggan(nama, telp, alamat);
+        
+        System.out.println("PILIH ID PELAYAN");
+        System.out.println("================");
+        
+        rs = db.fetchTable(DBManager.fetchTable.PELAYAN);
+        
+        int i = 1;
+        while(rs.next())
+        {
+            System.out.println("[" + rs.getInt("ID_PELAYAN") + "] " + rs.getString("NAMA"));
+        }
+        
+        System.out.println("================");
+        System.out.print("Pilih > ");
+        int id_pelayan = scn.nextInt();
     }
     
     public void delOrderMenu()

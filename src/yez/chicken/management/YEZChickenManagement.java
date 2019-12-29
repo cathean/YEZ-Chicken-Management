@@ -1,17 +1,15 @@
 package yez.chicken.management;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class YEZChickenManagement
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws SQLException
     {
         MenuOption menu = new MenuOption();
-        DBManager db = new DBManager();
         Scanner scn = new Scanner(System.in);
         int opt = 0;
-        
-        db.ConnectDB();
         
         do
         {
@@ -26,13 +24,15 @@ public class YEZChickenManagement
                     
                     switch(opt)
                     {
+                        case 2:
+                            menu.addOrderMenu();
+                            break;
                         case 0:
                             opt = -1;
                             break;
                     }
                     break;
                 case 2:
-                    menu.clearScreen();
                     menu.productMenu();
                     opt = scn.nextInt();
                     
