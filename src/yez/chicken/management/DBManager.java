@@ -15,18 +15,37 @@ public class DBManager
     
     public Connection conn = null;
     public Statement stmt = null;
+    public PreparedStatement pstmt = null;
     public ResultSet rs = null;
     
-    private boolean isDBExist = false;
-    private String dbName = "YEZ.db";
+    private String db = "YEZ";
+    private String host = "localhost";
+    private String user = "root";
+    private String pass = "";
+    private String url = "jdbc:mysql://localhost/";
     
     public void ConnectDB()
     {
         try
         {
-            Class.forName("org.sqlite.JDBC");
-            conn = DriverManager.getConnection("jdbc:sqlite:YEZ.db");
+            // Connecting to database
+            System.out.println("Connecting to database...");
+            
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(url, user, pass);
+            stmt = conn.createStatement();
+            
+            // Create the database if not exist
+            System.out.println("Creating the database...");
+            
+            String sql = "CREATE DATABASE IF NOT EXISTS " + db;
+            stmt.executeUpdate(sql);
+            sql = "USE " + db;
+            stmt.executeUpdate(sql);
+            
+            System.out.println("Database (already) created!");
 
+            // Initialization to the datables
             initTables();
         }catch(Exception e)
         {
@@ -40,88 +59,87 @@ public class DBManager
     // Database table initialization
     private void initTables() throws SQLException
     {
-        stmt = conn.createStatement();
-        String sql = "CREATE TABLE IF NOT EXISTS PELANGGAN " +
-                     "(ID_PELANGGAN  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                     " NAMA          TEXT                              NOT NULL," +
-                     " NO_TELP       CHAR(12)                                  ," +
-                     " ALAMAT        CHAR(50)                                  )";
+        String sql = "CREATE TABLE IF NOT EXISTS `PELANGGAN` " +
+                     "(`ID`  INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                     " `NAMA`          VARCHAR(20)          NOT NULL," +
+                     " `NO_TELP`       VARCHAR(12)          NOT NULL," +
+                     " `ALAMAT`        vARCHAR(50)          NOT NULL)";
         stmt.executeUpdate(sql);
         
-        sql = "CREATE TABLE IF NOT EXISTS PELAYAN " +
-              "(ID_PELAYAN    INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-              " NAMA          TEXT                              NOT NULL," +
-              " NO_TELP       CHAR(12)                                  ," +
-              " ALAMAT        CHAR(50)                                  )";
+        sql = "CREATE TABLE IF NOT EXISTS `PELAYAN` " +
+              "(`ID`    INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+              " `NAMA`          VARCHAR(20)            NOT NULL," +
+              " `NO_TELP`       VARCHAR(12)                    ," +
+              " `ALAMAT`        VARCHAR(50)                    )";
         stmt.executeUpdate(sql);
         
-        sql = "CREATE TABLE IF NOT EXISTS PRODUK " +
-              "(ID_PRODUK     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-              " NAMA_PRODUK   TEXT                              NOT NULL," +
-              " JENIS         CHAR(12)                          NOT NULL," +
-              " STOK          INTEGER                           NOT NULL," +
-              " HARGA         INTEGER                           NOT NULL)";
+        sql = "CREATE TABLE IF NOT EXISTS `PRODUK` " +
+              "(`ID`     INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+              " `NAMA`   VARCHAR(20)                    NOT NULL," +
+              " `JENIS`         VARCHAR(12)             NOT NULL," +
+              " `STOK`          INTEGER                 NOT NULL," +
+              " `HARGA`         INTEGER                 NOT NULL)";
         stmt.executeUpdate(sql);
         
-        sql = "CREATE TABLE IF NOT EXISTS ORDERS " +
-              "(ID_ORDERS     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-              " TGL_PEMBELIAN DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL," +
-              " ID_PELANGGAN  INTEGER                           NOT NULL," +
-              " ID_PELAYAN  INTEGER                           NOT NULL," +
-              " FOREIGN KEY(ID_PELANGGAN)   REFERENCES PELANGGAN(ID_PELANGGAN)," +
-              " FOREIGN KEY(ID_PELAYAN)     REFERENCES PELAYAN(ID_PELAYAN))";
+        sql = "CREATE TABLE IF NOT EXISTS `ORDERS` " +
+              "(`ID`     INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+              " `TGL_PEMBELIAN` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+              " `ID_PELANGGAN`  INT                         NOT NULL," +
+              " `ID_PELAYAN`  INT                           NOT NULL," +
+              " FOREIGN KEY(ID_PELANGGAN)   REFERENCES PELANGGAN(ID)," +
+              " FOREIGN KEY(ID_PELAYAN)     REFERENCES PELAYAN(ID))";
         stmt.executeUpdate(sql);
         
-        sql = "CREATE TABLE IF NOT EXISTS DETAIL_ORDERS " +
-              "(ID_DETAIL_ORDERS     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-              " KUANTITAS_PRODUK     INTEGER                           NOT NULL," +
-              " TOTAL                INTEGER                           NOT NULL," +
-              " ID_ORDERS            INTEGER                           NOT NULL," +
-              " ID_PRODUK            INTEGER                           NOT NULL," +
-              " FOREIGN KEY(ID_ORDERS)   REFERENCES ORDERS(ID_ORDERS)," +
-              " FOREIGN KEY(ID_PRODUK)   REFERENCES PRODUK(ID_PRODUK))";
+        sql = "CREATE TABLE IF NOT EXISTS `DETAIL_ORDERS` " +
+              "(`ID`     INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+              " `KUANTITAS_PRODUK`     INT              NOT NULL," +
+              " `TOTAL`                INT              NOT NULL," +
+              " `ID_ORDERS`            INT              NOT NULL," +
+              " `ID_PRODUK`            INT              NOT NULL," +
+              " FOREIGN KEY(ID_ORDERS)     REFERENCES ORDERS(ID)," +
+              " FOREIGN KEY(ID_PRODUK)     REFERENCES PRODUK(ID))";
         stmt.executeUpdate(sql);
         
         // ADD PRODUK COLUMNS ----
         
-        sql = "INSERT OR REPLACE INTO PRODUK" +
-              "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
+        sql = "REPLACE INTO `PRODUK`" +
+              "(ID, NAMA, JENIS, STOK, HARGA)" +
               "VALUES (1, 'Nasi Putih', 'Makanan', 25, 2000)";
         stmt.executeUpdate(sql);
         
-        sql = "INSERT OR REPLACE INTO PRODUK" +
-              "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
+        sql = "REPLACE INTO PRODUK" +
+              "(ID, NAMA, JENIS, STOK, HARGA)" +
               "VALUES (2, 'Ayam Bakar Paha', 'Makanan', 12, 8000)";
         stmt.executeUpdate(sql);
         
-        sql = "INSERT OR REPLACE INTO PRODUK" +
-              "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
+        sql = "REPLACE INTO PRODUK" +
+              "(ID, NAMA, JENIS, STOK, HARGA)" +
               "VALUES (3, 'Ayam Goreng Paha', 'Makanan', 4, 8000)";
         stmt.executeUpdate(sql);
         
-        sql = "INSERT OR REPLACE INTO PRODUK" +
-              "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
+        sql = "REPLACE INTO PRODUK" +
+              "(ID, NAMA, JENIS, STOK, HARGA)" +
               "VALUES (4, 'Ayam Bakar Dada', 'Makanan', 16, 10000)";
         stmt.executeUpdate(sql);
         
-        sql = "INSERT OR REPLACE INTO PRODUK" +
-              "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
+        sql = "REPLACE INTO PRODUK" +
+              "(ID, NAMA, JENIS, STOK, HARGA)" +
               "VALUES (5, 'Ayam Goren Dada', 'Makanan', 13, 10000)";
         stmt.executeUpdate(sql);
         
-        sql = "INSERT OR REPLACE INTO PRODUK" +
-              "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
+        sql = "REPLACE INTO PRODUK" +
+              "(ID, NAMA, JENIS, STOK, HARGA)" +
               "VALUES (6, 'Teh Manis', 'Minuman', 7, 3000)";
         stmt.executeUpdate(sql);
         
-        sql = "INSERT OR REPLACE INTO PRODUK" +
-              "(ID_PRODUK, NAMA_PRODUK, JENIS, STOK, HARGA)" +
+        sql = "REPLACE INTO PRODUK" +
+              "(ID, NAMA, JENIS, STOK, HARGA)" +
               "VALUES (7, 'Nutrisasri', 'Minuman', 12, 3000)";
         stmt.executeUpdate(sql);
         
         // ADD PELANGGAN COLUMNS ---
         
-        sql = "INSERT OR REPLACE INTO PELAYAN " +
+        sql = "REPLACE INTO PELAYAN " +
               "(NAMA, NO_TELP, ALAMAT) " +
               "VALUES ('Thoriq', '08123456789', 'Tubagus Ismail Dalam' )";
         stmt.executeUpdate(sql);
@@ -129,18 +147,20 @@ public class DBManager
     
     public void addPelanggan(String nama, String telp, String alamat) throws SQLException
     {
-        stmt = conn.createStatement();
-        
         String sql = "INSERT INTO PELANGGAN " +
                      "(NAMA, NO_TELP, ALAMAT) " +
-                     "VALUES ('" + nama + "', '" + telp + "', '" + alamat + "')";
-        stmt.executeUpdate(sql);
+                     "VALUES (?, ?, ?)";
+        
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, nama);
+        pstmt.setString(2, telp);
+        pstmt.setString(1, alamat);
+        
+        pstmt.executeUpdate();
     }
     
     private void addPelayan(String nama, String telp, String alamat) throws SQLException
     {
-        stmt = conn.createStatement();
-        
         String sql = "INSERT INTO PELAYAN " +
                      "(NAMA, NO_TELP, ALAMAT) " +
                      "VALUES ('" + nama + "', '" + telp + "', '" + alamat + "')";
@@ -149,8 +169,6 @@ public class DBManager
     
     private void addOrders(int id_pelanggan, int id_pelayan) throws SQLException
     {
-        stmt = conn.createStatement();
-        
         String sql = "INSERT INTO ORDERS " +
                      " (ID_PELANGGAN, ID_PELAYAN) " +
                      " VALUES ('" + id_pelanggan + "', '" + id_pelayan + "')";
@@ -159,8 +177,6 @@ public class DBManager
     
     private void addOrdersDetail(int Qty, int total, int id_orders, int id_produk) throws SQLException
     {
-        stmt = conn.createStatement();
-        
         String sql = "INSERT INTO DETAIL_ORDERS " +
                     " (KUANTITAS_PROUDK, TOTAL, ID_ORDERS, ID_PRODUK) " +
                     " VALUES ('" + Qty + "', '" + total + "', '" + id_orders + "', '" + id_produk + "')";
@@ -169,7 +185,6 @@ public class DBManager
     
     public ResultSet fetchTable(fetchTable ft) throws SQLException
     {
-        stmt = conn.createStatement();
         String sql = "";
         
         if(ft == fetchTable.PELANGGAN)
