@@ -1,6 +1,5 @@
 package yez.chicken.management;
 
-import java.io.IOException;
 import java.util.Scanner;
 import java.sql.*;
 
@@ -20,28 +19,117 @@ public class MenuOption
     
     public void mainMenu()
     {
-        System.out.printf(
-                  "1) Menu Order\n"
-                + "2) Menu Produk\n"
-                + "0) Exit\n"
-                + "================\n"
-                + "Pilih > "
-        );
+        System.out.println("1) Menu Pelanggan");
+        System.out.println("2) Menu Orders");
+        System.out.println("3) Menu Detail Orders");
+        System.out.println("4) Menu Pelayan");
+        System.out.println("5) Menu Produk");
+        System.out.println("0) Exit");
+        System.out.println("=====================");
+        System.out.println("Pilih > ");
     }
+    
+    // MENU PELANGAN FUNCTION
+    
+    public void pelangganMenu()
+    {
+        System.out.println("MENU EDIT DATA PELANGGAN");
+        System.out.println("======================");
+        System.out.println("1) Tambah Data Pelanggan");
+        System.out.println("2) Tampil Data Pelanggan");
+        System.out.println("3) Hapus Data Pelangan");
+        System.out.println("0) Kembali");
+        System.out.println("======================");
+        System.out.println("Pilih > ");
+    }
+    
+    public void tambahPelanggan()
+    {
+        System.out.println("TAMBAH DATA PELANGGAN");
+        System.out.println("=====================");
+        System.out.print("Masukkan Nama     : ");
+        String nama = scn.nextLine();
+        
+        System.out.print("Masukkan No. Telp : ");
+        String telp = scn.nextLine();
+        
+        System.out.print("Masukkan Alamat   : ");
+        String alamat = scn.nextLine();
+        
+        // Add data to the PELANGGAN table
+        try{ db.addRowPelanggan(nama, telp, alamat); }catch(SQLException e){ System.err.println(e.getClass().getName() + ": " + e.getMessage()); }
+    }
+    
+    public void tampilPelanggan()
+    {
+        System.out.println("TAMPIL DATA PELANGGAN");
+        System.out.println("=====================");
+        System.out.println();
+        
+        // Fetch table PELANGGAN
+        try
+        { 
+            rs = db.fetchTable(TableName.PELANGGAN);
+            
+            System.out.printf("%s", new String(new char[71]).replace("\0", "="));
+            System.out.println();
+            System.out.printf("|| %-20.20s|| %-20.20s|| %-20.20s||\n", "NAMA", "NO. TELEPON", "ALAMAT");
+            System.out.printf("%s", new String(new char[71]).replace("\0", "+"));
+            System.out.println();
+            
+            while(rs.next())
+            {
+                System.out.printf("|| %-20.20s|| %-20.20s|| %-20.20s||\n", rs.getString("NAMA"), rs.getString("NO_TELP"), rs.getString("ALAMAT"));
+                
+                if(rs.next())
+                {
+                    System.out.printf("%s", new String(new char[71]).replace("\0", "-"));
+                    System.out.println();
+                    rs.previous();
+                }
+            }
+            
+            System.out.printf("%s", new String(new char[71]).replace("\0", "="));
+            System.out.println();
+        }
+        catch(SQLException e)
+        {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
+        }
+        
+    }
+    
+    public void hapusPelanggan()
+    {
+        System.out.println("HAPUS DATA PELANGGAN");
+        System.out.println("=====================");
+    }
+    
+    // MENU ORDERS FUNCTION
     
     public void orderMenu()
     {
-        System.out.printf(
-                  "1) Lihat Order\n"
-                + "2) Tambah Order\n"
-                + "3) Hapus Order\n"
-                + "0) Kembali\n"
-                + "================\n"
-                + "Pilih > "
-        );
+        System.out.println("MENU EDIT DATA ORDERS");
+        System.out.println("=====================");
+        System.out.println("1) Tambah Orders");
+        System.out.println("2) Tampilkan Orders");
+        System.out.println("3) Hapus Orders");
+        System.out.println("0) Kembali");
+        System.out.println("=====================");
+        System.out.println("Pilih > ");
     }
     
-    public void showOrderMenu()
+    public void tambahOrders()
+    {
+        
+    }
+    
+    public void tampilOrders()
+    {
+        
+    }
+    
+    public void hapusOrders()
     {
         
     }
@@ -59,12 +147,12 @@ public class MenuOption
         System.out.print("Alamat   : ");
         String alamat = scn.nextLine();
         
-        db.addPelanggan(nama, telp, alamat);
+        db.addRowPelanggan(nama, telp, alamat);
         
         System.out.println("PILIH ID PELAYAN");
         System.out.println("================");
         
-        rs = db.fetchTable(DBManager.fetchTable.PELAYAN);
+        rs = db.fetchTable(TableName.PELAYAN);
         
         int i = 1;
         while(rs.next())
@@ -77,33 +165,89 @@ public class MenuOption
         int id_pelayan = scn.nextInt();
     }
     
-    public void delOrderMenu()
+    // MENU DETAIL_ORDERS FUNCTION
+    
+    public void detailOrdersMenu()
     {
+        System.out.println("MENU EDIT DATA DETAIL ORDERS");
+        System.out.println("============================");
+        System.out.println("1) Tambah Data Detail Orders");
+        System.out.println("2) Tampil Data Detail Orders");
+        System.out.println("3) Hapus Data Detail Orders");
+        System.out.println("0) Kembali");
+        System.out.println("============================");
+        System.out.println("Pilih > ");
     }
     
-    public void productMenu()
-    {
-        System.out.printf(
-                  "1) Lihat Produk\n"
-                + "2) Tambah Produk\n"
-                + "3) Hapus Produk\n"
-                + "0) Kembali\n"
-                + "================\n"
-                + "Pilih > "
-        );
-    }
-    
-    public void showProductMenu()
+    public void tambahDetailOrders()
     {
         
     }
     
-    public void addProductMenu()
+    public void tampilDetailOrders()
     {
         
     }
     
-    public void delProductMenu()
+    public void hapusDetailOrders()
+    {
+        
+    }
+    
+    // MENU PELAYAN FUNCTION
+    
+    public void pelayanMenu()
+    {
+        System.out.println("MENU EDIT DATA PELAYAN");
+        System.out.println("======================");
+        System.out.println("1) Tambah Data Pelayan");
+        System.out.println("2) Tampil Data Pelayan");
+        System.out.println("3) Hapus Data Pelayan");
+        System.out.println("0) Kembali");
+        System.out.println("======================");
+        System.out.println("Pilih > ");
+    }
+    
+    public void tambahPelayan()
+    {
+        
+    }
+    
+    public void tampilPelayan()
+    {
+        
+    }
+    
+    public void hapusPelayan()
+    {
+        
+    }
+    
+    // MENU PRODUCT FUNCTION
+    
+    public void produkMenu()
+    {
+        System.out.println("MENU EDIT DATA PRODUK");
+        System.out.println("=====================");
+        System.out.println("1) Tambah Data Produk");
+        System.out.println("2) Tampil Data Produk");
+        System.out.println("3) Hapus Data Produk");
+        System.out.println("0) Kembali");
+        System.out.println("=====================");
+        System.out.println("Pilih > ");
+    }
+    
+    public void tambahProduk()
+    {
+        
+    }
+    
+    public void tampilProduk()
+    {
+        
+    }
+    
+    public void hapusProduk()
     {
         
     }

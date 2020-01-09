@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+
 public class YEZChickenManagement
 {
     public static void main(String[] args) throws SQLException
@@ -16,35 +17,40 @@ public class YEZChickenManagement
             menu.mainMenu();
             opt = scn.nextInt();
             
-            switch(opt)
+            if(opt == TableName.PELANGGAN.getValue())
             {
-                case 1:
-                    menu.orderMenu();
-                    opt = scn.nextInt();
-                    
-                    switch(opt)
-                    {
-                        case 2:
-                            menu.addOrderMenu();
-                            break;
-                        case 0:
-                            opt = -1;
-                            break;
-                    }
-                    break;
-                case 2:
-                    menu.productMenu();
-                    opt = scn.nextInt();
-                    
-                    switch(opt)
-                    {
-                        case 0:
-                            opt = -1;
-                            break;
-                    }
-                    break;
+                menu.pelangganMenu();
+                opt = scn.nextInt();
+                
+                if(opt == 1)
+                {
+                    menu.tambahPelanggan();
+                }
+                else if(opt == 2)
+                {
+                    menu.tampilPelanggan();
+                }
             }
-            
+            else if(opt == TableName.ORDERS.getValue())
+            {
+                menu.orderMenu();
+                opt = scn.nextInt();
+            }
+            else if(opt == TableName.DETAIL_ORDERS.getValue())
+            {
+                menu.detailOrdersMenu();
+                opt = scn.nextInt();
+            }
+            else if(opt == TableName.PELAYAN.getValue())
+            {
+                menu.pelayanMenu();
+                opt = scn.nextInt();
+            }
+            else if(opt == TableName.PRODUK.getValue())
+            {
+                menu.produkMenu();
+                opt = scn.nextInt();
+            }
         }while(opt != 0);
         
     }   
