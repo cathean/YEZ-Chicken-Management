@@ -38,8 +38,14 @@ public class DBManager
 
             // Initialization data to the database
             initTablesData();
-        }catch(Exception e)
+        }catch(SQLException e)
         {
+            System.out.println("SQLException Error");
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }catch(ClassNotFoundException e)
+        {
+            System.out.println("ClassNotFoundException Error");
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
@@ -157,6 +163,20 @@ public class DBManager
         pstmt.executeUpdate();
     }
     
+    public void remRowPelanggan(int id_pelanggan) throws SQLException
+    {
+        String sql = " UPDATE PELANGGAN " +
+                     " SET STATUS=0     " +
+                     " WHERE ID=?       ";
+        
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_pelanggan);
+        
+        pstmt.executeUpdate();
+    }
+    
+    // PELANGAN TABLE OPERATION
+    
     private void addRowPelayan(String nama, String telp, String alamat) throws SQLException
     {
         String sql = " INSERT INTO PELAYAN " +
@@ -171,6 +191,19 @@ public class DBManager
         pstmt.executeUpdate();
     }
     
+    public void remRowPelayan(int id_pelayan) throws SQLException
+    {
+        String sql = " UPDATE PELAYAN " +
+                     " SET STATUS=0     " +
+                     " WHERE ID=?       ";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_pelayan);
+        
+        pstmt.executeUpdate();
+    }
+    
+    // ORDERS TABLE OPERATION
+    
     private void addRowOrders(int id_pelanggan, int id_pelayan) throws SQLException
     {
         String sql = " INSERT INTO ORDERS " +
@@ -183,6 +216,19 @@ public class DBManager
         
         stmt.executeUpdate(sql);
     }
+    
+    public void remRowOrders(int id_order) throws SQLException
+    {
+        String sql = " UPDATE ORDERS " +
+                     " SET STATUS=0     " +
+                     " WHERE ID=?       ";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_order);
+        
+        pstmt.executeUpdate();
+    }
+    
+    // ORDERS DETAIL TABLE OPERATION
     
     private void addRowOrdersDetail(int Qty, int total, int id_orders, int id_produk) throws SQLException
     {
@@ -199,6 +245,28 @@ public class DBManager
         stmt.executeUpdate(sql);
     }
     
+    public void remRowOrdersDetail(int id_detail_orders) throws SQLException
+    {
+        String sql = " UPDATE DETAIL_ORDERS " +
+                     " SET STATUS=0         " +
+                     " WHERE ID=?           ";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_detail_orders);
+        
+        pstmt.executeUpdate();
+    }
+    
+    // PRODUK TABLE OPERATION
+    
+    public void addRowProduk() throws SQLException
+    {
+        
+    }
+    
+    public void remRowProduk() throws SQLException
+    {
+        
+    }
     
     // Fetch table
     public ResultSet fetchTable(TableName ft) throws SQLException

@@ -1,5 +1,6 @@
 package yez.chicken.management;
 
+import java.io.*;
 import java.util.Scanner;
 import java.sql.*;
 
@@ -17,6 +18,30 @@ public class MenuOption
         db.ConnectDB();
     }
     
+    public void showLogo()
+    {
+        try
+        {
+            FileReader fr = new FileReader("logo.dat");
+            int i;
+
+            while((i = fr.read()) != -1)
+                System.out.print((char)i);
+            
+            System.out.println();
+            System.out.printf("%s", new String(new char[85]).replace("\0", "~"));
+            System.out.println();
+        }
+        catch(FileNotFoundException e)
+        {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+        catch(IOException e)
+        {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+    
     public void mainMenu()
     {
         System.out.println("1) Menu Pelanggan");
@@ -26,7 +51,7 @@ public class MenuOption
         System.out.println("5) Menu Produk");
         System.out.println("0) Exit");
         System.out.println("=====================");
-        System.out.println("Pilih > ");
+        System.out.print("Pilih > ");
     }
     
     // MENU PELANGAN FUNCTION
@@ -40,7 +65,7 @@ public class MenuOption
         System.out.println("3) Hapus Data Pelangan");
         System.out.println("0) Kembali");
         System.out.println("======================");
-        System.out.println("Pilih > ");
+        System.out.print("Pilih > ");
     }
     
     public void tambahPelanggan()
@@ -71,7 +96,7 @@ public class MenuOption
         { 
             rs = db.fetchTable(TableName.PELANGGAN);
             
-            System.out.printf("%s", new String(new char[71]).replace("\0", "="));
+            System.out.printf("%s", new String(new char[71]).replace("\0", "-"));
             System.out.println();
             System.out.printf("|| %-20.20s|| %-20.20s|| %-20.20s||\n", "NAMA", "NO. TELEPON", "ALAMAT");
             System.out.printf("%s", new String(new char[71]).replace("\0", "+"));
@@ -91,8 +116,15 @@ public class MenuOption
             
             System.out.printf("%s", new String(new char[71]).replace("\0", "="));
             System.out.println();
+            System.out.println();
+            System.out.println("Tekan Tombol Apa Saja untuk Kembali...");
+            System.in.read();
         }
         catch(SQLException e)
+        {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
+        }
+        catch(IOException e)
         {
             System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
         }
@@ -103,6 +135,17 @@ public class MenuOption
     {
         System.out.println("HAPUS DATA PELANGGAN");
         System.out.println("=====================");
+        System.out.print("Masukkan ID Pelanggan : ");
+        int id_pelanggan = scn.nextInt();
+        
+        try
+        {
+            db.remRowPelanggan(id_pelanggan);
+            System.out.println("Berhasil dihapus!");
+        }catch(SQLException e)
+        {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage()); 
+        }
     }
     
     // MENU ORDERS FUNCTION
@@ -116,7 +159,7 @@ public class MenuOption
         System.out.println("3) Hapus Orders");
         System.out.println("0) Kembali");
         System.out.println("=====================");
-        System.out.println("Pilih > ");
+        System.out.print("Pilih > ");
     }
     
     public void tambahOrders()
@@ -176,7 +219,7 @@ public class MenuOption
         System.out.println("3) Hapus Data Detail Orders");
         System.out.println("0) Kembali");
         System.out.println("============================");
-        System.out.println("Pilih > ");
+        System.out.print("Pilih > ");
     }
     
     public void tambahDetailOrders()
@@ -205,7 +248,7 @@ public class MenuOption
         System.out.println("3) Hapus Data Pelayan");
         System.out.println("0) Kembali");
         System.out.println("======================");
-        System.out.println("Pilih > ");
+        System.out.print("Pilih > ");
     }
     
     public void tambahPelayan()
@@ -234,7 +277,7 @@ public class MenuOption
         System.out.println("3) Hapus Data Produk");
         System.out.println("0) Kembali");
         System.out.println("=====================");
-        System.out.println("Pilih > ");
+        System.out.print("Pilih > ");
     }
     
     public void tambahProduk()
@@ -252,8 +295,16 @@ public class MenuOption
         
     }
     
-    public static void clearScreen()
+    public void clearScreen() throws IOException, InterruptedException
     {
-        for (int i = 0; i < 50; ++i) System.out.println();
+        if(System.console() == null)
+        {
+            System.out.println("Jangan RUN Aplikasi dari console NetBeans!");
+            System.out.println("Build terlebih dahulu lalu RUN lewat CMD!");
+            System.exit(0);
+        }
+        else
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+
     }
 }
