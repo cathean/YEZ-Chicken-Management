@@ -83,7 +83,7 @@ public class DBManager
         
         sql = "CREATE TABLE IF NOT EXISTS `ORDERS` " +
               "(`ID`     INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-              " `TGL_PEMBELIAN` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL," +
+              " `TGL_PEMBELIAN` DATE                           ," +
               " `ID_PELANGGAN`  INT                         NOT NULL," +
               " `ID_PELAYAN`    INT                         NOT NULL," +
               " FOREIGN KEY(ID_PELANGGAN)   REFERENCES PELANGGAN(ID)," +
@@ -163,6 +163,38 @@ public class DBManager
         pstmt.executeUpdate();
     }
     
+    public ResultSet srcRowPelanggan(String identity) throws SQLException
+    {
+        String sql = " SELECT * FROM PELANGGAN " +
+                     " WHERE " + identity + " AND STATUS=1";
+      
+        rs = stmt.executeQuery(sql);
+        
+        return rs;
+    }
+    
+    public void updtRowPelanggan(int id_pelanggan, String nama, String no_telp, String alamat) throws SQLException
+    {
+        if(nama.equals("000"))
+            nama = "NAMA";
+        else if(no_telp.equals("000"))
+            no_telp = "NO_TELP";
+        else if(alamat.equals("000"))
+            alamat = "ALAMAT";
+        
+        String sql = " UPDATE PELANGGAN                " +
+                     " SET NAMA=?, NO_TELP=?, ALAMAT=? " +
+                     " WHERE ID=? AND STATUS=1         ";
+        
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, nama);
+        pstmt.setString(2, no_telp);
+        pstmt.setString(3, alamat);
+        pstmt.setInt(4, id_pelanggan);
+        
+        pstmt.executeUpdate();
+    }
+    
     public void remRowPelanggan(int id_pelanggan) throws SQLException
     {
         String sql = " UPDATE PELANGGAN " +
@@ -175,9 +207,9 @@ public class DBManager
         pstmt.executeUpdate();
     }
     
-    // PELANGAN TABLE OPERATION
+    // PELAYAN TABLE OPERATION
     
-    private void addRowPelayan(String nama, String telp, String alamat) throws SQLException
+    public void addRowPelayan(String nama, String telp, String alamat) throws SQLException
     {
         String sql = " INSERT INTO PELAYAN " +
                      " (NAMA, NO_TELP, ALAMAT, STATUS) " +
@@ -187,6 +219,38 @@ public class DBManager
         pstmt.setString(1, nama);
         pstmt.setString(2, telp);
         pstmt.setString(3, alamat);
+        
+        pstmt.executeUpdate();
+    }
+    
+    public ResultSet srcRowPelayan(String identity) throws SQLException
+    {
+        String sql = " SELECT * FROM PELAYAN " +
+                     " WHERE " + identity + " AND STATUS=1";
+      
+        rs = stmt.executeQuery(sql);
+        
+        return rs;
+    }
+    
+    public void updtRowPelayan(int id_pelayan, String nama, String no_telp, String alamat) throws SQLException
+    {
+        if(nama.equals("000"))
+            nama = "NAMA";
+        else if(no_telp.equals("000"))
+            no_telp = "NO_TELP";
+        else if(alamat.equals("000"))
+            alamat = "ALAMAT";
+        
+        String sql = " UPDATE PELAYAN                " +
+                     " SET NAMA=?, NO_TELP=?, ALAMAT=? " +
+                     " WHERE ID=? AND STATUS=1         ";
+        
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, nama);
+        pstmt.setString(2, no_telp);
+        pstmt.setString(3, alamat);
+        pstmt.setInt(4, id_pelayan);
         
         pstmt.executeUpdate();
     }
@@ -204,33 +268,69 @@ public class DBManager
     
     // ORDERS TABLE OPERATION
     
-    private void addRowOrders(int id_pelanggan, int id_pelayan) throws SQLException
+    public void addRowOrders(int id_pelanggan, int id_pelayan) throws SQLException
     {
         String sql = " INSERT INTO ORDERS " +
-                     " (ID_PELANGGAN, ID_PELAYAN, STATUS) " +
-                     " VALUES (?, ?, 1)";
+                     " (TGL_PEMBELIAN, ID_PELANGGAN, ID_PELAYAN, STATUS) " +
+                     " VALUES (CURDATE(), " + id_pelanggan + ", " + id_pelayan + ", 1)";
         
         pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, id_pelanggan);
-        pstmt.setInt(2, id_pelayan);
         
         stmt.executeUpdate(sql);
     }
     
-    public void remRowOrders(int id_order) throws SQLException
+    public ResultSet srcRowOrders(String identity) throws SQLException
     {
-        String sql = " UPDATE ORDERS " +
+        String sql = " SELECT * FROM ORDERS " +
+                     " WHERE " + identity + " AND STATUS=1";
+      
+        rs = stmt.executeQuery(sql);
+        
+        return rs;
+    }
+    
+    public void updtRowOrders(int id_orders, java.sql.Date date, int id_pelanggan, int id_pelayan) throws SQLException
+    { 
+        String sql = " UPDATE ORDERS                                     " +
+                     " SET TGL_PEMBELIAN=?, ID_PELANGGAN=?, ID_PELAYAN=? " +
+                     " WHERE ID=? AND STATUS=1                           ";
+        
+        pstmt = conn.prepareStatement(sql);
+        
+        if(date.equals("000"))
+            pstmt.setString(1, "TGL_PEMBELIAN");
+        else
+            pstmt.setDate(1, date);
+        
+        if(id_pelanggan == 0)
+            pstmt.setString(2, "ID_PELANGGAN");
+        else
+            pstmt.setInt(2, id_pelanggan);
+        
+        if(id_pelayan == 0)
+            pstmt.setString(3, "ID_PELAYAN");
+        else
+            pstmt.setInt(3, id_pelayan);
+        
+        pstmt.setInt(4, id_orders);
+        
+        pstmt.executeUpdate();
+    }
+    
+    public void remRowOrders(int id_orders) throws SQLException
+    {
+        String sql = " UPDATE ORDERS    " +
                      " SET STATUS=0     " +
                      " WHERE ID=?       ";
         pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, id_order);
+        pstmt.setInt(1, id_orders);
         
         pstmt.executeUpdate();
     }
     
     // ORDERS DETAIL TABLE OPERATION
     
-    private void addRowOrdersDetail(int Qty, int total, int id_orders, int id_produk) throws SQLException
+    public void addRowOrdersDetail(int Qty, int total, int id_orders, int id_produk) throws SQLException
     {
         String sql = "INSERT INTO DETAIL_ORDERS " +
                     " (KUANTITAS_PROUDK, TOTAL, ID_ORDERS, ID_PRODUK, STATUS) " +
@@ -258,20 +358,101 @@ public class DBManager
     
     // PRODUK TABLE OPERATION
     
-    public void addRowProduk() throws SQLException
+    public void addRowProduk(String nama, String jenis, int stok, int harga) throws SQLException
     {
+        String sql = " INSERT INTO PRODUK " +
+                     " (NAMA, JENIS, STOK, HARGA, STATUS) " +
+                     " VALUES (?, ?, ?, ?, 1)";
         
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, nama);
+        pstmt.setString(2, jenis);
+        pstmt.setInt(3, stok);
+        pstmt.setInt(4, harga);
+        
+        pstmt.executeUpdate();
     }
     
-    public void remRowProduk() throws SQLException
+    public ResultSet srcRowProduk(String identity) throws SQLException
     {
+        String sql = " SELECT * FROM PRODUK " +
+                     " WHERE " + identity + " AND STATUS=1";
+      
+        rs = stmt.executeQuery(sql);
         
+        return rs;
     }
     
-    // Fetch table
-    public ResultSet fetchTable(TableName ft) throws SQLException
+    public void updtRowProduk(int id_produk, String nama, String jenis, int stok, int harga) throws SQLException
+    {
+        String sql = " UPDATE PRODUK                                     " +
+                     " SET NAMA=?, JENIS=?, STOK=?, HARGA=? " +
+                     " WHERE ID=? AND STATUS=1                           ";
+        
+        pstmt = conn.prepareStatement(sql);
+        
+        if(nama.equals("000"))
+            pstmt.setString(1, "NAMA");
+        else
+            pstmt.setString(1, nama);
+        
+        if(jenis.equals("000"))
+            pstmt.setString(2, "JENIS");
+        else
+            pstmt.setString(2, jenis);
+        
+        if(stok == 0)
+            pstmt.setString(3, "STOK");
+        else
+            pstmt.setInt(3, stok);
+        
+        if(harga == 0)
+            pstmt.setString(4, "HARGA");
+        else
+            pstmt.setInt(4, harga);
+        
+        pstmt.setInt(5, id_produk);
+        
+        pstmt.executeUpdate();
+    }
+    
+    public void remRowProduk(int id_produk) throws SQLException
+    {
+        String sql = " UPDATE PRODUK    " +
+                     " SET STATUS=0     " +
+                     " WHERE ID=?       ";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_produk);
+        
+        pstmt.executeUpdate();
+    }
+    
+    // Fetch table result
+    public ResultSet fetchTable(TableName ft, int n) throws SQLException
     {
         String sql = "";
+        int m = n + 5;
+        
+        if(ft == TableName.PELANGGAN)
+            sql = "SELECT * FROM PELANGGAN WHERE STATUS=1 LIMIT " + n + "," + m;
+        else if(ft == TableName.ORDERS)
+            sql = "SELECT * FROM ORDERS WHERE STATUS=1 LIMIT " + n + "," + m;
+        else if(ft == TableName.DETAIL_ORDERS)
+            sql = "SELECT * FROM DETAIL_ORDERS WHERE STATUS=1 LIMIT " + n + "," + m;
+        else if(ft == TableName.PELAYAN)
+            sql = "SELECT * FROM PELAYAN WHERE STATUS=1 LIMIT " + n + "," + m;
+        else if(ft == TableName.PRODUK)
+            sql = "SELECT * FROM PRODUK WHERE STATUS=1 LIMIT " + n + "," + m;
+        
+        rs = stmt.executeQuery(sql);
+        
+        return rs;
+    }
+    
+    public int countRows(TableName ft) throws SQLException
+    {
+        String sql = "";
+        int rowCount = 0;
         
         if(ft == TableName.PELANGGAN)
             sql = "SELECT * FROM PELANGGAN WHERE STATUS=1";
@@ -286,6 +467,12 @@ public class DBManager
         
         rs = stmt.executeQuery(sql);
         
-        return rs;
+        if(rs.last())
+        {
+            rowCount = rs.getRow(); 
+            rs.beforeFirst();
+        }
+        
+        return rowCount;
     }
 }
