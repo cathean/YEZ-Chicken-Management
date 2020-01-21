@@ -37,7 +37,7 @@ public class DBManager
             System.out.println("Database (already) created!");
 
             // Initialization data to the database
-            //initTablesData();
+            initTablesData();
         }catch(SQLException e)
         {
             System.out.println("SQLException Error");
