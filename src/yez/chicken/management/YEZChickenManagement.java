@@ -24,7 +24,28 @@ public class YEZChickenManagement
                 menu.showLogo();
                 menu.mainMenu();
                 opt = Integer.parseInt(scn.readLine());
-
+                
+                if(opt == 11)
+                {
+                    menu.clearScreen();
+                    menu.showLogo();
+                    menu.tambahTransaksi();
+                    brk.nextLine();
+                }
+                else if(opt == 22)
+                {
+                    menu.clearScreen();
+                    menu.showLogo();
+                    menu.tampilTransaksi();
+                    brk.nextLine();
+                }
+                else if(opt == 33)
+                {
+                    menu.clearScreen();
+                    menu.showLogo();
+                    menu.hapusTransaksi();
+                    brk.nextLine();
+                }
                 if(opt == TableName.PELANGGAN.getValue())
                 {
                     do
@@ -143,10 +164,61 @@ public class YEZChickenManagement
                 }
                 else if(opt == TableName.DETAIL_ORDERS.getValue())
                 {
-                    menu.clearScreen();
-                    menu.showLogo();
-                    menu.detailOrdersMenu();
-                    opt = scn.read();
+                    do
+                    {
+                        do
+                        {
+                            menu.clearScreen();
+                            menu.showLogo();
+                            max = menu.tampilDetailOrders(counter);
+                            menu.orderMenu();
+
+                            // Option validation
+                            String ch = scn.readLine();
+
+                            if(ch.equals("n") && counter < max)
+                            {
+                                counter++;
+                                incorrectOpt = true;
+                            }
+                            else if(ch.equals("p") && counter > 1)
+                            {
+                                counter--;
+                                incorrectOpt = true;
+                            }
+                            else if((ch.equals("n") || ch.equals("p")) && (counter >= max || counter <= 1))
+                                incorrectOpt = true;
+                            else if(Integer.parseInt(ch) >= 0 && Integer.parseInt(ch) <= 3)
+                            {
+                                opt = Integer.parseInt(ch);
+                                incorrectOpt = false;
+                            }
+                            else
+                                incorrectOpt = true;
+                        }
+                        while(incorrectOpt);
+
+                        menu.clearScreen();
+                        menu.showLogo();
+
+                        if(opt == 1)
+                        {
+                            menu.tambahDetailOrders();
+                            brk.nextLine();
+                        }
+                        else if(opt == 2)
+                        {
+                            menu.cariDetailOrders();
+                            brk.nextLine();
+                        }
+                        else if(opt == 3)
+                        {
+                            menu.hapusDetailOrders();
+                            brk.nextLine();
+                        }
+                        else if(opt == 0)
+                            opt = -1;
+                    }while(opt != -1);
                 }
                 else if(opt == TableName.PELAYAN.getValue())
                 {

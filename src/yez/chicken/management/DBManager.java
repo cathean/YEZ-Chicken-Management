@@ -37,7 +37,7 @@ public class DBManager
             System.out.println("Database (already) created!");
 
             // Initialization data to the database
-            initTablesData();
+            //initTablesData();
         }catch(SQLException e)
         {
             System.out.println("SQLException Error");
@@ -97,8 +97,8 @@ public class DBManager
               " `TOTAL`                INT              NOT NULL," +
               " `ID_ORDERS`            INT              NOT NULL," +
               " `ID_PRODUK`            INT              NOT NULL," +
-              " FOREIGN KEY(ID_ORDERS)     REFERENCES ORDERS(ID)," +
-              " FOREIGN KEY(ID_PRODUK)     REFERENCES PRODUK(ID)," +
+              " FOREIGN KEY(ID_ORDERS)     REFERENCES ORDERS(ID) ON DELETE CASCADE," +
+              " FOREIGN KEY(ID_PRODUK)     REFERENCES PRODUK(ID) ON DELETE CASCADE," +
               " `STATUS`        INT                    NOT NULL)";
         stmt.executeUpdate(sql);
         
@@ -333,16 +333,51 @@ public class DBManager
     public void addRowOrdersDetail(int Qty, int total, int id_orders, int id_produk) throws SQLException
     {
         String sql = "INSERT INTO DETAIL_ORDERS " +
-                    " (KUANTITAS_PROUDK, TOTAL, ID_ORDERS, ID_PRODUK, STATUS) " +
-                    " VALUES (?, ?, ?, ?, 1)";
-        
-        pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, Qty);
-        pstmt.setInt(2, total);
-        pstmt.setInt(3, id_orders);
-        pstmt.setInt(4, id_produk);
+                    " (KUANTITAS_PRODUK, TOTAL, ID_ORDERS, ID_PRODUK, STATUS) " +
+                    " VALUES (" + Qty + "," + total + ", " + id_orders + ", " + id_produk + ", 1)";
         
         stmt.executeUpdate(sql);
+    }
+    
+     public ResultSet srcRowOrdersDetail(String identity) throws SQLException
+    {
+        String sql = " SELECT * FROM DETAIL_ORDERS " +
+                     " WHERE " + identity + " AND STATUS=1";
+      
+        rs = stmt.executeQuery(sql);
+        
+        return rs;
+    }
+    
+    public void updtRowOrdersDetail(int id_orders_detail, int id_orders, int id_produk, int kuantitas) throws SQLException
+    { 
+        int price = getPrice(id_produk);
+        
+        String sql = " UPDATE DETAIL_ORDERS                                              " +
+                     " SET ID_ORDERS=?, ID_PRODUK=?, KUANTITAS_PRODUK=?, TOTAL=?  " +
+                     " WHERE ID=? AND STATUS=1                                    ";
+        
+        pstmt = conn.prepareStatement(sql);
+        
+        if(id_orders == 0)
+            pstmt.setString(1, "ID_ORDERS");
+        else
+            pstmt.setInt(1, id_orders);
+        
+        if(id_produk == 0)
+            pstmt.setString(2, "ID_PRODUK");
+        else
+            pstmt.setInt(2, id_produk);
+        
+        if(kuantitas == 0)
+            pstmt.setString(3, "KUANTITAS_PRODUK");
+        else
+            pstmt.setInt(3, kuantitas);
+        
+        pstmt.setInt(4, price * kuantitas);
+        pstmt.setInt(5, id_orders_detail);
+        
+        pstmt.executeUpdate();
     }
     
     public void remRowOrdersDetail(int id_detail_orders) throws SQLException
@@ -449,6 +484,61 @@ public class DBManager
         return rs;
     }
     
+    public ResultSet fetchTable(TableName ft) throws SQLException
+    {
+        String sql = "";
+        
+        if(ft == TableName.PELANGGAN)
+            sql = "SELECT * FROM PELANGGAN WHERE STATUS=1";
+        else if(ft == TableName.ORDERS)
+            sql = "SELECT * FROM ORDERS WHERE STATUS=1";
+        else if(ft == TableName.DETAIL_ORDERS)
+            sql = "SELECT * FROM DETAIL_ORDERS WHERE STATUS=1";
+        else if(ft == TableName.PELAYAN)
+            sql = "SELECT * FROM PELAYAN WHERE STATUS=1";
+        else if(ft == TableName.PRODUK)
+            sql = "SELECT * FROM PRODUK WHERE STATUS=1";
+        
+        rs = stmt.executeQuery(sql);
+        return rs;
+    }
+    
+    public int fetchLastRowID(TableName ft) throws SQLException
+    {
+        String what = "";
+        
+        if(ft == TableName.PELANGGAN)
+            what = "PELANGGAN";
+        else if(ft == TableName.ORDERS)
+            what = "ORDERS";
+        else if(ft == TableName.DETAIL_ORDERS)
+            what = "DETAIL_ORDERS";
+        else if(ft == TableName.PELAYAN)
+            what = "PELAYAN";
+        else if(ft == TableName.PRODUK)
+            what = "PRODUK";
+        
+        String sql = "SELECT * FROM " + what + " ORDER BY ID DESC LIMIT 1";
+        rs = stmt.executeQuery(sql);
+        rs.next();
+        return rs.getInt("ID");
+    }
+    
+    public ResultSet fetchProdukFromOrders(int id_orders) throws SQLException
+    {
+        String sql = "SELECT * FROM PRODUK, DETAIL_ORDERS WHERE PRODUK.ID=DETAIL_ORDERS.ID_PRODUK AND DETAIL_ORDERS.ID_ORDERS=" + id_orders;
+        rs = stmt.executeQuery(sql);
+        return rs;
+    }
+    
+    public int getPrice(int id_produk) throws SQLException
+    {
+        String sql = "SELECT * FROM PRODUK WHERE ID=" + id_produk;
+        rs = stmt.executeQuery(sql);
+        rs.next();
+        return rs.getInt("HARGA");
+    }
+    
     public int countRows(TableName ft) throws SQLException
     {
         String sql = "";
@@ -474,5 +564,28 @@ public class DBManager
         }
         
         return rowCount;
+    }
+    
+    public void remLinked(int id_pelanggan) throws SQLException
+    {
+        String sql = "UPDATE PELANGGAN SET STATUS=0 WHERE ID=?";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_pelanggan);
+        pstmt.executeUpdate();
+        
+        String identity = "ID_PELANGGAN=" + id_pelanggan;
+        rs = srcRowOrders(identity);
+        rs.next();
+        int id_orders = rs.getInt("ID");
+        
+        sql = "UPDATE ORDERS SET STATUS=0 WHERE ID=?";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_orders);
+        pstmt.executeUpdate();
+        
+        sql = "UPDATE DETAIL_ORDERS SET STATUS=0 WHERE ID_ORDERS=?";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, id_orders);
+        pstmt.executeUpdate();
     }
 }
